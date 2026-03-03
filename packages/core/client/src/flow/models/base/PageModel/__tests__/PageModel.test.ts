@@ -182,6 +182,41 @@ describe('PageModel', () => {
     });
   });
 
+  describe('render header spacing with tabs', () => {
+    it('should compact page header bottom spacing when tabs are enabled', () => {
+      pageModel.props = {
+        displayTitle: true,
+        enableTabs: true,
+        title: 'Title',
+        headerStyle: { backgroundColor: 'var(--colorBgLayout)' },
+      } as any;
+      pageModel.renderTabs = vi.fn(() => null);
+
+      const result = pageModel.render() as any;
+      const header = result.props.children[0];
+
+      expect(header.props.style).toMatchObject({
+        backgroundColor: 'var(--colorBgLayout)',
+        paddingBottom: 0,
+      });
+    });
+
+    it('should keep original header style when tabs are disabled', () => {
+      pageModel.props = {
+        displayTitle: true,
+        enableTabs: false,
+        title: 'Title',
+        headerStyle: { backgroundColor: 'var(--colorBgLayout)' },
+      } as any;
+      pageModel.renderFirstTab = vi.fn(() => null);
+
+      const result = pageModel.render() as any;
+      const header = result.props.children[0];
+
+      expect(header.props.style).toEqual({ backgroundColor: 'var(--colorBgLayout)' });
+    });
+  });
+
   describe('dirty refresh signal', () => {
     it('should invoke current tab onActive when dataSource:dirty is emitted and page is active', async () => {
       const listeners: Record<string, any> = {};
@@ -209,7 +244,7 @@ describe('PageModel', () => {
       listeners['dataSource:dirty']({ dataSourceKey: 'main', resourceNames: ['posts'] });
       await Promise.resolve();
 
-      expect(invokeSpy).toHaveBeenCalledWith('tab1', 'onActive');
+      expect(invokeSpy).toHaveBeenCalledWith('tab1', 'onActive', false);
     });
 
     it('should invoke current tab onActive on mount when view:activated happened before PageModel mounted', () => {
