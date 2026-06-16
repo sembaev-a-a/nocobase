@@ -1,4 +1,6 @@
 ---
+title: "Block: Map"
+keywords: "Blocks"
 displayName: "Блок: карта"
 packageName: '@nocobase/plugin-map'
 description: |

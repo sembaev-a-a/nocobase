@@ -42,9 +42,7 @@ description: Подготовка Ubuntu, Docker Desktop, Node.js, Yarn и Codex
 wsl --install
 ```
 
-После установки перезагрузите компьютер.
-
-По умолчанию эта команда устанавливает Ubuntu. При первом запуске Ubuntu попросит создать имя пользователя и пароль Linux. Эти имя и пароль используются только внутри WSL и не обязаны совпадать с учётной записью Windows.
+После установки перезагрузите компьютер. По умолчанию эта команда устанавливает Ubuntu. При первом запуске Ubuntu попросит создать имя пользователя и пароль Linux. Эти имя и пароль используются только внутри WSL и не обязаны совпадать с учётной записью Windows.
 
 Чтобы установить конкретный дистрибутив, сначала выведите список доступных дистрибутивов:
 
@@ -58,77 +56,59 @@ wsl --list --online
 wsl --install -d Ubuntu
 ```
 
-## Шаг 2: Подтверждение версии WSL
+## Шаг 2: подтвердите версию WSL
 
-Выполните следующую команду в PowerShell:
+В PowerShell выполните:
 
 ```powershell
 wsl --list --verbose
 ```
 
-Вывод должен выглядеть примерно так:
+Убедитесь, что у нужного дистрибутива указано `VERSION 2`:
 
 ```text
   NAME      STATE           VERSION
 * Ubuntu    Running         2
 ```
 
-Убедитесь, что `VERSION` равен `2`. Если дистрибутив всё ещё использует WSL 1, преобразуйте его в WSL 2:
+Если это WSL 1, преобразуйте его в WSL 2 и сделайте WSL 2 версией по умолчанию:
 
 ```powershell
 wsl --set-version Ubuntu 2
-```
-
-Также рекомендуем установить WSL 2 версией по умолчанию для вновь устанавливаемых дистрибутивов:
-
-```powershell
 wsl --set-default-version 2
-```
-
-При необходимости можно один раз обновить WSL:
-
-```powershell
 wsl --update
 ```
 
-## Шаг 3: Установка Docker Desktop
+## Шаг 3: установите Docker Desktop
 
 Если вы планируете устанавливать или запускать NocoBase через Docker, установите Docker Desktop для Windows.
 
-Скачайте установщик из документации Docker:
+- [Install Docker Desktop on Windows](https://docs.docker.com/desktop/setup/install/windows-install/)
 
-- [Установка Docker Desktop в Windows](https://docs.docker.com/desktop/setup/install/windows-install/)
+Для локальной разработки обычно достаточно режима `Per-user`. На странице настройки выберите `Use WSL 2 instead of Hyper-V`, затем запустите Docker Desktop из меню Пуск.
 
-Во время установки обратите внимание на следующие параметры:
+## Шаг 4: включите интеграцию Docker с WSL
 
-1. Обычно для локальной разработки на личном компьютере выбирайте `Per-user`
-2. На странице конфигурации выберите `Use WSL 2 instead of Hyper-V`
-3. После установки запустите Docker Desktop из меню «Пуск» Windows
-4. При первом запуске прочитайте и примите Docker Desktop Subscription Service Agreement
+В Docker Desktop включите backend WSL 2:
 
-## Шаг 4: Включение интеграции Docker с WSL
-
-После запуска Docker Desktop сначала убедитесь, что включён бэкенд WSL 2:
-
-1. Перейдите в Docker Desktop / Settings / General
-2. Убедитесь, что включён параметр Use the WSL 2 based engine
-3. Нажмите Apply
+1. Docker Desktop / Settings / General
+2. Use the WSL 2 based engine
+3. Apply
 
 ![Docker Desktop WSL 2 engine](https://static-docs.nocobase.com/2026-06-12-19-10-41.png)
 
-Затем включите интеграцию с дистрибутивом:
+Затем включите интеграцию с WSL-дистрибутивом:
 
-1. Перейдите в Docker Desktop / Settings / Resources / WSL Integration
-2. Включите Enable integration with my default WSL distro
-3. Найдите нужный дистрибутив, например `Ubuntu`
-4. Включите переключатель для этого дистрибутива
-5. Нажмите Apply & restart или Apply
+1. Docker Desktop / Settings / Resources / WSL Integration
+2. Enable integration with my default WSL distro
+3. Включите нужный дистрибутив, например `Ubuntu`
+4. Apply & restart или Apply
 
 ![Docker Desktop WSL integration](https://static-docs.nocobase.com/2026-06-12-19-11-09.png)
 
-Если WSL Integration не отображается в разделе Resources, Docker Desktop обычно работает в режиме Windows containers. Щёлкните значок Docker в системном трее Windows, переключитесь на Linux containers и проверьте снова.
+Если WSL Integration не отображается, Docker Desktop, скорее всего, находится в режиме Windows containers. Переключитесь на Linux containers через значок Docker в системном трее Windows и проверьте снова.
 
-## Шаг 5: Проверка Docker
+## Шаг 5: проверьте Docker
 
 Сначала проверьте из PowerShell:
 
@@ -139,13 +119,13 @@ docker compose version
 docker run hello-world
 ```
 
-Затем войдите в WSL:
+Зайдите в WSL:
 
 ```powershell
 wsl
 ```
 
-Выполните следующие команды внутри WSL:
+Затем выполните внутри WSL:
 
 ```bash
 docker version
@@ -153,32 +133,20 @@ docker compose version
 docker run hello-world
 ```
 
-Если контейнер `hello-world` успешно загружен и запущен, Docker Desktop и интеграция с WSL 2 работают.
+Если контейнер `hello-world` скачивается и запускается успешно, интеграция Docker Desktop и WSL 2 работает.
 
-## Шаг 6: Установка Node.js и Yarn в WSL
+## Шаг 6: установите Node.js и Yarn в WSL
 
-Сам WSL не является средой выполнения Node.js. Ubuntu, установленная через `wsl --install`, обычно не включает Node.js или npm, поэтому установите их внутри дистрибутива WSL.
+WSL не является средой Node.js по умолчанию. Ubuntu, установленная через `wsl --install`, обычно не содержит Node.js и npm.
 
-Войдите в WSL из PowerShell:
-
-```powershell
-wsl
-```
-
-Все команды ниже выполняются в терминале WSL.
-
-Сначала проверьте, установлен ли уже Node.js:
+В WSL сначала проверьте:
 
 ```bash
 node -v
 npm -v
 ```
 
-Если появляется `command not found`, установите Node.js одним из следующих способов.
-
-### Вариант A: Установка Node.js 22 через NodeSource
-
-Если в этом окружении WSL нужна одна общая версия Node.js, рекомендуется NodeSource.
+Если команда не найдена, установите Node.js 22 через NodeSource:
 
 ```bash
 sudo apt update
@@ -186,19 +154,12 @@ sudo apt install -y curl
 curl -fsSL https://deb.nodesource.com/setup_22.x -o nodesource_setup.sh
 sudo -E bash nodesource_setup.sh
 sudo apt install -y nodejs
-```
-
-Проверьте установку:
-
-```bash
 node -v
 npm -v
 npx -v
 ```
 
-### Вариант B: Установка Node.js 22 через nvm
-
-Если нужно переключать версии Node.js между проектами или проект использует `.nvmrc` для фиксации версии, используйте nvm.
+Если нужно переключать версии Node.js между проектами, используйте nvm:
 
 ```bash
 sudo apt update
@@ -207,41 +168,18 @@ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.5/install.sh | bash
 source ~/.bashrc
 nvm install 22
 nvm use 22
-```
-
-Проверьте установку:
-
-```bash
 node -v
 npm -v
 npx -v
 ```
 
-Если в корне проекта нужно зафиксировать Node.js 22, создайте `.nvmrc`:
-
-```bash
-echo "22" > .nvmrc
-nvm install
-nvm use
-```
-
-Позже после входа в каталог проекта выполните:
-
-```bash
-nvm use
-```
-
-Это переключит на версию, указанную проектом.
-
 :::warning Примечание
 
-Выберите NodeSource или nvm. Не рекомендуем смешивать оба способа управления Node.js в одном пользовательском окружении WSL.
+Выберите NodeSource или nvm. Не рекомендуется смешивать оба способа управления Node.js в одном пользователе WSL.
 
 :::
 
-### Установка Yarn 1.x
-
-Для локальной разработки NocoBase требуется Yarn 1.x. После установки Node.js можно включить Yarn через Corepack:
+Установите Yarn 1.x:
 
 ```bash
 corepack enable
@@ -249,52 +187,43 @@ corepack prepare yarn@1.22.22 --activate
 yarn -v
 ```
 
-Если Corepack недоступен в вашем окружении, установите Yarn через npm:
+Если Corepack недоступен:
 
 ```bash
 npm install -g yarn@1.22.22
 yarn -v
 ```
 
-## Шаг 7: Установка Codex CLI
+## Шаг 7: установите Codex CLI
 
-Codex CLI также можно использовать в нативной командной строке Windows. В этом руководстве он устанавливается внутри WSL, чтобы Codex и локальный инструментарий NocoBase находились в одном Linux-окружении. Когда Codex выполняет команды вроде `nb`, `yarn` или `docker`, он использует те же пути к файлам, синтаксис оболочки и среду выполнения.
+Codex CLI также можно использовать в нативной командной строке Windows. В этом руководстве он устанавливается в WSL, чтобы Codex и локальный инструментарий NocoBase находились в одной Linux-среде.
 
-Убедитесь, что вы сейчас находитесь внутри WSL:
+Убедитесь, что вы находитесь в WSL:
 
 ```bash
 echo $WSL_DISTRO_NAME
 ```
 
-Если выводится имя дистрибутива, например `Ubuntu`, вы находитесь внутри WSL.
-
-Выполните установщик Codex CLI внутри WSL:
+Установите Codex CLI в WSL:
 
 ```bash
 curl -fsSL https://chatgpt.com/codex/install.sh | sh
 ```
 
-Для неинтерактивной установки используйте:
+Для неинтерактивной установки:
 
 ```bash
 curl -fsSL https://chatgpt.com/codex/install.sh | CODEX_NON_INTERACTIVE=1 sh
 ```
 
-После установки выполните:
+Запустите и проверьте Codex:
 
 ```bash
 codex
-```
-
-При первом запуске появится запрос на вход. Следуйте подсказкам и выполните аутентификацию с учётной записью ChatGPT или ключом OpenAI API.
-
-Проверьте доступность команды Codex:
-
-```bash
 codex --version
 ```
 
-Рекомендуем запускать Codex из каталога проекта внутри WSL:
+Рекомендуется запускать Codex из каталога проекта внутри WSL:
 
 ```bash
 mkdir -p ~/projects
@@ -304,62 +233,48 @@ codex
 
 :::tip Примечание
 
-Поскольку Codex установлен внутри WSL, затем запускайте `codex` из терминала WSL. Если выполнить `codex` из Windows PowerShell, будет использоваться нативное окружение командной строки Windows, а не окружение, подготовленное в этом руководстве.
+Поскольку Codex установлен в WSL, затем запускайте `codex` из терминала WSL. PowerShell использует нативную среду Windows, а не WSL-среду, подготовленную в этом руководстве.
 
 :::
 
-## Где размещать файлы проекта
+## Где хранить файлы проекта
 
-Рекомендуем размещать файлы проекта внутри файловой системы WSL, например:
+Рекомендуется хранить проекты в файловой системе WSL:
 
 ```bash
 ~/projects/my-app
 ```
 
-Избегайте использования смонтированного пути Windows как расположения проекта по умолчанию, например:
+Не используйте путь Windows mount как место по умолчанию:
 
 ```bash
 /mnt/c/Users/<your-name>/projects/my-app
 ```
 
-Обычно это даёт лучшую производительность файловой системы и уменьшает проблемы с символическими ссылками и правами. Разница особенно заметна для проектов с большим количеством файлов зависимостей, таких как проекты Node.js, Python, Java или Go.
+Обычно это дает лучшую производительность файловой системы и снижает проблемы с правами и символическими ссылками.
 
-Чтобы открыть файлы WSL из проводника Windows, перейдите по адресу:
+Чтобы открыть файлы WSL из Проводника Windows:
 
 ```text
 \\wsl$\Ubuntu\home\<your-name>
 ```
 
-## Часто задаваемые вопросы
+## FAQ
 
-### WSL сообщает, что команда docker не найдена
+### WSL не находит команду docker
 
-Сначала убедитесь, что дистрибутив использует WSL 2:
+Убедитесь, что дистрибутив использует WSL 2, затем включите интеграцию в Docker Desktop / Settings / Resources / WSL Integration.
 
 ```powershell
 wsl --list --verbose
-```
-
-Если используется WSL 1, преобразуйте его в WSL 2:
-
-```powershell
 wsl --set-version Ubuntu 2
 ```
 
-Затем вернитесь в Docker Desktop, перейдите в Settings / Resources / WSL Integration, включите интеграцию для соответствующего дистрибутива и примените изменения.
+### WSL Integration не отображается
 
-### Отсутствует WSL Integration
+Docker Desktop, вероятно, находится в режиме Windows containers. Через значок Docker переключитесь на Linux containers и снова откройте настройки WSL Integration.
 
-Обычно Docker Desktop в данный момент работает в режиме Windows containers.
-
-Можно поступить так:
-
-1. Щёлкните значок Docker в системном трее Windows
-2. Выберите Switch to Linux containers
-3. Дождитесь перезапуска Docker Desktop
-4. Снова перейдите в Settings / Resources / WSL Integration
-
-### Docker Desktop не запускается или WSL ведёт себя необычно
+### Docker Desktop не запускается или WSL выглядит некорректно
 
 Сначала попробуйте:
 
@@ -370,40 +285,28 @@ wsl --update
 
 Затем перезапустите Docker Desktop.
 
-### Docker Engine был установлен в WSL вручную
+### Docker Engine уже установлен вручную в WSL
 
-Docker рекомендует удалить Docker Engine или Docker CLI, установленные напрямую в дистрибутив Linux WSL, перед установкой Docker Desktop. Иначе они могут конфликтовать с интеграцией Docker Desktop и WSL.
+Docker рекомендует удалить Docker Engine или Docker CLI, установленные напрямую в WSL-дистрибутиве, перед использованием Docker Desktop, чтобы избежать конфликтов с WSL-интеграцией.
 
-Обычно внутри дистрибутива WSL удаляют `docker-ce`, `docker-ce-cli`, `containerd.io` и связанные пакеты, а затем используют интеграцию Docker CLI, предоставляемую Docker Desktop.
+### WSL не находит команду codex
 
-### WSL сообщает, что команда codex не найдена
-
-Сначала убедитесь, что команда выполняется внутри WSL, а не в PowerShell:
+Убедитесь, что вы в WSL, затем проверьте `PATH`:
 
 ```bash
 echo $WSL_DISTRO_NAME
-```
-
-Затем проверьте, есть ли Codex в `PATH`:
-
-```bash
 which codex
-```
-
-Если команда не найдена, откройте терминал WSL заново или выполните установщик снова:
-
-```bash
 curl -fsSL https://chatgpt.com/codex/install.sh | sh
 ```
 
-## Официальные ссылки
+## Официальные материалы
 
-- [Microsoft Learn: установка Linux в Windows с помощью WSL](https://learn.microsoft.com/en-us/windows/wsl/install)
-- [Microsoft Learn: установка Node.js в подсистеме Windows для Linux](https://learn.microsoft.com/en-us/windows/dev-environment/javascript/nodejs-on-wsl)
-- [Docker Docs: установка Docker Desktop в Windows](https://docs.docker.com/desktop/setup/install/windows-install/)
-- [Docker Docs: бэкенд Docker Desktop WSL 2 в Windows](https://docs.docker.com/desktop/features/wsl/)
-- [Docker Docs: изменение настроек Docker Desktop](https://docs.docker.com/desktop/settings-and-maintenance/settings/)
+- [Microsoft Learn: How to install Linux on Windows with WSL](https://learn.microsoft.com/en-us/windows/wsl/install)
+- [Microsoft Learn: Install Node.js on Windows Subsystem for Linux](https://learn.microsoft.com/en-us/windows/dev-environment/javascript/nodejs-on-wsl)
+- [Docker Docs: Install Docker Desktop on Windows](https://docs.docker.com/desktop/setup/install/windows-install/)
+- [Docker Docs: Docker Desktop WSL 2 backend on Windows](https://docs.docker.com/desktop/features/wsl/)
+- [Docker Docs: Change your Docker Desktop settings](https://docs.docker.com/desktop/settings-and-maintenance/settings/)
 - [OpenAI Developers: Codex CLI](https://developers.openai.com/codex/cli)
-- [OpenAI Developers: Codex в Windows](https://developers.openai.com/codex/windows)
+- [OpenAI Developers: Codex on Windows](https://developers.openai.com/codex/windows)
 - [nvm: Node Version Manager](https://github.com/nvm-sh/nvm)
-- [npm Docs: загрузка и установка Node.js и npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm/)
+- [npm Docs: Downloading and installing Node.js and npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm/)

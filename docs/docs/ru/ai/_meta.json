@@ -10,16 +10,16 @@
       },
       {
         "type": "custom-link",
-        "label": "Требования к операционной системе",
+        "label": "Требования к ОС",
         "items": [
           {
             "type": "custom-link",
-            "label": "Системные требования",
+            "label": "Продакшн",
             "link": "/get-started/system-requirements"
           },
           {
             "type": "custom-link",
-            "label": "Настройка локального окружения разработки",
+            "label": "Локальная разработка",
             "link": "/ai/local-development-setup"
           }
         ],
@@ -42,12 +42,12 @@
       },
       {
         "type": "custom-link",
-        "label": "Руководство по обновлению NocoBase с 2.0 до 2.1",
+        "label": "Обновление с 2.0 до 2.1",
         "link": "/ai/upgrade-from-2-0-to-2-1"
       },
       {
         "type": "custom-link",
-        "label": "Руководство по интеграции ИИ агентов",
+        "label": "Руководство по подключению ИИ агентов",
         "link": "/ai/quick-start"
       },
       {
