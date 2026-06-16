@@ -17,6 +17,7 @@ import {
   Button,
   Descriptions,
   Dropdown,
+  Input,
   Modal,
   Result,
   Spin,
@@ -64,6 +65,9 @@ import { RemoveNodeContextProvider } from './RemoveNodeContext';
 import { NodeDragContextProvider } from './NodeDragContext';
 import { NodeClipboardContextProvider } from './NodeClipboardContext';
 import { useResourceFilterActionProps } from './hooks/useResourceFilterActionProps';
+import { useFlowEngine } from '@nocobase/flow-engine';
+import { resolveLegacyTriggerExecuteRenderMode } from '../client-v2/triggers';
+import { openExecuteWorkflowDialog } from '../client-v2/triggers/ExecuteWorkflowButton';
 
 function ExecutionResourceProvider({ request, filter = {}, ...others }) {
   const { workflow } = useFlowContext();
@@ -150,13 +154,17 @@ function ActionDisabledProvider({ children }) {
   const field = useField<any>();
   const { workflow } = useFlowContext();
   const trigger = useTrigger();
-  const valid = trigger.validate(workflow.config);
+  const valid = trigger?.validate?.(workflow.config) ?? false;
+  const renderMode = trigger ? resolveLegacyTriggerExecuteRenderMode(trigger) : 'none';
   let message = '';
   switch (true) {
+    case !trigger:
+      message = lang('This trigger type is not available in the new canvas yet.');
+      break;
     case !valid:
       message = lang('The trigger is not configured correctly, please check the trigger configuration.');
       break;
-    case !trigger.triggerFieldset:
+    case renderMode === 'none':
       message = lang('This type of trigger has not been supported to be executed manually.');
       break;
     default:
@@ -168,8 +176,45 @@ function ActionDisabledProvider({ children }) {
 
 function ExecuteActionButton() {
   const { workflow } = useFlowContext();
+  const flowEngine = useFlowEngine();
   const executed = useWorkflowExecuted();
   const trigger = useTrigger();
+  const { refresh } = useResourceActionContext();
+  const renderMode = trigger ? resolveLegacyTriggerExecuteRenderMode(trigger) : 'none';
+
+  if (!trigger) {
+    return (
+      <Tooltip title={lang('This trigger type is not available in the new canvas yet.')}>
+        <span>
+          <Button disabled>{lang('Execute manually')}</Button>
+        </span>
+      </Tooltip>
+    );
+  }
+
+  if (renderMode === 'modern-loader' && trigger?.TriggerFieldsetLoader) {
+    const valid = trigger.validate(workflow.config);
+    return (
+      <Tooltip title={undefined}>
+        <span>
+          <Button
+            onClick={() =>
+              openExecuteWorkflowDialog({
+                ctx: flowEngine.context,
+                workflow,
+                trigger,
+                TriggerFieldsetLoader: trigger.TriggerFieldsetLoader,
+                valid,
+                refresh,
+              })
+            }
+          >
+            {lang('Execute manually')}
+          </Button>
+        </span>
+      </Tooltip>
+    );
+  }
 
   return (
     <CurrentWorkflowContext.Provider value={workflow}>
@@ -277,6 +322,7 @@ function WorkflowMenu() {
   const { workflow, revisions = [] } = useFlowContext();
   const [historyVisible, setHistoryVisible] = useState(false);
   const [detailsVisible, setDetailsVisible] = useState(false);
+  const [editingDescription, setEditingDescription] = useState('');
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { modal } = App.useApp();
@@ -284,6 +330,7 @@ function WorkflowMenu() {
   const { resource } = useResourceContext();
   const { refresh } = useResourceActionContext();
   const { message } = App.useApp();
+  const { styles } = useStyles();
   const allExecuted = useWorkflowAnyExecuted();
 
   const onRevision = useCallback(async () => {
@@ -369,6 +416,33 @@ function WorkflowMenu() {
   const formatUser = useCallback((user) => user?.nickname || user?.username || user?.email || user?.id || '-', []);
   const formatTime = useCallback((value) => (value ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : '-'), []);
 
+  useEffect(() => {
+    if (detailsVisible) {
+      setEditingDescription(workflow.description ?? '');
+    }
+  }, [detailsVisible, workflow.description]);
+
+  const onChangeDescription = useCallback((event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setEditingDescription(event.target.value);
+  }, []);
+
+  const onBlurDescription = useCallback(
+    async (event: React.FocusEvent<HTMLTextAreaElement>) => {
+      const description = event.target.value;
+      if (description === (workflow.description ?? '')) {
+        return;
+      }
+      await resource.update({
+        filterByTk: workflow.id,
+        values: {
+          description,
+        },
+      });
+      refresh();
+    },
+    [refresh, resource, workflow.description, workflow.id],
+  );
+
   return (
     <>
       <Dropdown
@@ -428,7 +502,15 @@ function WorkflowMenu() {
           <Descriptions.Item label={t('Last updated by')}>{formatUser(workflow.updatedBy)}</Descriptions.Item>
           <Descriptions.Item label={t('Last updated at')}>{formatTime(workflow.updatedAt)}</Descriptions.Item>
           <Descriptions.Item label={t('Description')} span={2}>
-            <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{workflow.description || '-'}</div>
+            <Input.TextArea
+              aria-label={t('Description')}
+              value={editingDescription}
+              onChange={onChangeDescription}
+              onBlur={onBlurDescription}
+              placeholder="-"
+              className={styles.workflowDetailsDescriptionClass}
+              autoSize={{ minRows: 3, maxRows: 8 }}
+            />
           </Descriptions.Item>
         </Descriptions>
       </Modal>
