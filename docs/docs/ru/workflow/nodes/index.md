@@ -26,12 +26,12 @@
   - [Расчет даты](./date-calculation.md) (предоставляется плагином @nocobase/plugin-workflow-date-calculation)
   - [Вычисление JSON](./json-query.md) (предоставляется плагином @nocobase/plugin-workflow-json-query)
 - Действия с коллекциями
-  - [Создание данных](./create.md)
-  - [Обновление данных](./update.md)
-  - [Удаление данных](./destroy.md)
-  - [Запрос данных](./query.md)
-  - [Агрегированный запрос](./aggregate.md) (предоставляется плагином @nocobase/plugin-workflow-aggregate)
-  - [SQL-операция](./sql.md) (предоставляется плагином @nocobase/plugin-workflow-sql)
+  - [Создать запись](./create.md)
+  - [Обновить запись](./update.md)
+  - [Удалить запись](./destroy.md)
+  - [Выбрать записи](./query.md)
+  - [Агрегирующий запрос](./aggregate.md) (предоставляется плагином @nocobase/plugin-workflow-aggregate)
+  - [Действие SQL](./sql.md) (предоставляется плагином @nocobase/plugin-workflow-sql)
   - [Транзакция базы данных](./transaction.md) (предоставляется плагином @nocobase/plugin-workflow-transaction)
 - Ручная обработка
   - [Ручная обработка](./manual.md) (предоставляется плагином @nocobase/plugin-workflow-manual)
